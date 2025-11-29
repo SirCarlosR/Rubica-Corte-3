@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuarios {
+  id             Int              @id @default(autoincrement())
+  nombre         String
+  email          String           @unique
+  password       String
+  createdAt      DateTime         @default(now())
+
+  Favoritas      Favoritas[]
+  MisPlataformas MisPlataformas[]
+}
+
+model Plataformas {
+  id         Int          @id @default(autoincrement())
+  nombre     String       @unique
+  imagen     String
+
+  Peliculas  Peliculas[]
+  Usuarios   MisPlataformas[]
+}
+
+model MisPlataformas {
+  id                Int          @id @default(autoincrement())
+  usuariosId        Int
+  plataformaId      Int
+
+  usuario           Usuarios     @relation(fields: [usuariosId], references: [id])
+  plataforma        Plataformas  @relation(fields: [plataformaId], references: [id])
+}
+
+model Peliculas {
+  id             Int          @id @default(autoincrement())
+  titulo         String
+  descripcion    String
+  año            Int
+  genero         String
+  imagen         String
+  plataformaId   Int
+
+  plataforma     Plataformas  @relation(fields: [plataformaId], references: [id])
+  Favoritas      Favoritas[]
+}
+
+model Favoritas {
+  id          Int       @id @default(autoincrement())
+  usuarioId   Int
+  peliculaId  Int
+  puntuacion  Int
+
+  usuario     Usuarios    @relation(fields: [usuarioId], references: [id])
+  pelicula    Peliculas   @relation(fields: [peliculaId], references: [id])
+}
